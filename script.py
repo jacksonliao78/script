@@ -2,6 +2,7 @@ import requests
 import getpass
 import json
 import time
+import os
 
 class MassArchive:
     def __init__(self, address, name, password):
@@ -60,7 +61,9 @@ class MassArchive:
         for i in range(0, len(issue_keys), batch_size):
             batch = issue_keys[i:i+batch_size]
             self.archive_specific(batch)
-            time.sleep(2)  
+            time.sleep(2) 
+
+        self.write_issues(issue_keys)
 
     def archive_specific(self, issue_keys):
         session = requests.session()
@@ -68,6 +71,11 @@ class MassArchive:
 
         for line in response.iter_lines():
             print('Issue %s is Archived' % line.decode("utf-8").split(',')[0])
+
+    def write_issues(self, issue_keys):
+        with open("archived_issues.txt", "w") as file:
+            for key in issue_keys:
+                file.write(key + "\n")
 
     def print_issues(self, jql, limit):
         issue_keys = list(self.search_issues(jql, limit))
